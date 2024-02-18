@@ -15,6 +15,9 @@ Secure the major objectives around Batumi:
 3. Neutralize the Insurgent stronghold in Mahindzhauri
 4. Prevent Red Forces from capturing or destroying the Batumi airfield.
 
+## How to Use This Mission
+
+
 ### Mission Changelog
 010: Initial proof of concept borrowing heavily from other community generated missions.
 
