@@ -23,13 +23,11 @@ Secure the major objectives around Batumi:
 5. Optionally visit Olympus' website for details on playing custom missions with the Olympus mod.
 
 ### Mission Changelog
-010: Initial proof of concept borrowing heavily from other community generated missions.
-
-011: Fully functioning prototype with working troop drop off mechanics:
-  - AI infantry spawns from AI trucks.
-  - Randomized mortar attacks on objectives.
-  - Objective capturing mechanics.
-  - Scaling AI difficulty based on the number of players on server.
+013: Adds to mission immersiveness:
+  - Adds voice over sound files for key game events (thank you Lemony_Headz!).
+  - Trucks stop to disembark troops and then start again afterwards.
+  - Player deaths/crashes contribute to supply drain
+  - Embarking troops on transport UH-1H's will increase payload weight of aircraft.
 
 012: Improvements in AI forces:
   - Added variety of AI red forces.
@@ -37,8 +35,10 @@ Secure the major objectives around Batumi:
   - Fixed multiple F10 troop pickup/drop command issue.
   - Reduced smoke indicator frequency to improve performance.
 
-013: Adds to mission immersiveness:
-  - Adds voice over sound files for key game events (thank you Lemony_Headz!).
-  - Trucks stop to disembark troops and then start again afterwards.
-  - Player deaths/crashes contribute to supply drain
-  - Embarking troops on transport UH-1H's will increase payload weight of aircraft.
+011: Fully functioning prototype with working troop drop off mechanics:
+  - AI infantry spawns from AI trucks.
+  - Randomized mortar attacks on objectives.
+  - Objective capturing mechanics.
+  - Scaling AI difficulty based on the number of players on server.
+
+010: Initial proof of concept borrowing heavily from other community generated missions.
