@@ -14,3 +14,18 @@ Secure the major objectives around Batumi:
 2. Docks
 3. Neutralize the Insurgent stronghold in Mahindzhauri
 4. Prevent Red Forces from capturing or destroying the Batumi airfield.
+
+### Mission Changelog
+010: Initial proof of concept borrowing heavily from other community generated missions.
+
+011: Fully functioning prototype with working troop drop off mechanics:
+  - AI infantry spawns from AI trucks.
+  - Randomized mortar attacks on objectives.
+  - Objective capturing mechanics.
+  - Scaling AI difficulty based on the number of players on server.
+
+012: Improvements in AI forces:
+  - Added variety of AI red forces.
+  - Improved immersion of red forces with better patroling mechanisms.
+  - Fixed multiple F10 troop pickup/drop command issue.
+  - Reduced smoke indicator frequency to improve performance.
