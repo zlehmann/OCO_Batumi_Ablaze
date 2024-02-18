@@ -1,6 +1,11 @@
+# Olympus COIN (Counter Insurgency) Operations
+Olympus COIN Operation (OCO) missions attempt to provide DCS players with ready to play COIN mission sets built to utilize the Olympus () DCS mod. The goal is to provide a playing environment where players can cooperatively fight against AI insurgents with an Olympus commander. Players will utilize available assests to help aid the blue forces' ground units and secure victory including transport helicopters to deploy infantry units around the map!
+
 # OCO Batumi Ablaze
 Tensions boil over as the citizens of Batumi reach their breaking point. At the helm of the burgeoning rebellion, the insurgent leader issues a rallying cry, urging the sons and daughters of Batumi to seize arms and upend the incumbent government.
+
 ![OCO Batumi Ablaze](https://github.com/zlehmann/OCO_Batumi_Ablaze/blob/main/OCO_BatumiAblaze_Cover.jpg?raw=true)
+
 With a surge of fervor, insurgents boil forth from their bastions in Mahindzhauri and Hevachauri, converging upon the heart of the city. Georgian forces hastily mobilize, safeguarding vital assets like the Batumi airfield, alongside pivotal infrastructural linchpins such as the bustling port and the indispensable power plant.
 
 ## Blue Team Objectives
