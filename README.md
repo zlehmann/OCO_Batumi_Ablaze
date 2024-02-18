@@ -29,3 +29,9 @@ Secure the major objectives around Batumi:
   - Improved immersion of red forces with better patroling mechanisms.
   - Fixed multiple F10 troop pickup/drop command issue.
   - Reduced smoke indicator frequency to improve performance.
+
+013: Adds to mission immersiveness:
+  - Adds voice over sound files for key game events (thank you Lemony_Headz!).
+  - Trucks stop to disembark troops and then start again afterwards.
+  - Player deaths/crashes contribute to supply drain
+  - Embarking troops on transport UH-1H's will increase payload weight of aircraft.
