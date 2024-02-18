@@ -16,7 +16,11 @@ Secure the major objectives around Batumi:
 4. Prevent Red Forces from capturing or destroying the Batumi airfield.
 
 ## How to Use This Mission
-
+1. Download the .miz file
+2. Place the .miz file in your DCS.openbeta Missions folder (default: C:/Users/{your user name}/Saved Games/DCS.openbeta/Missions
+3. Start DCS
+4. Start a mission and choose this .miz file to play.
+5. Optionally visit Olympus' website for details on playing custom missions with the Olympus mod.
 
 ### Mission Changelog
 010: Initial proof of concept borrowing heavily from other community generated missions.
