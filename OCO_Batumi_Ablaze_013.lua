@@ -149,7 +149,7 @@ Objectives = {
         ZoneName = "Obj_Mahind",
         BlueUnits = 0,
         RedUnits = 0,
-        Owner = "Uncontrolled"
+        Owner = "Red"
     }
 }
 
@@ -174,6 +174,11 @@ DropoffZones = {
     [3] = {
         Name = "Helvachauri",
         ZoneName = "DropoffZone_Helvachauri",
+        DropFunction = DropoffGroupDirect
+    },
+    [4] = {
+        Name = "Batumi Air Base",
+        ZoneName = "DropoffZone_BatumiAirBase",
         DropFunction = DropoffGroupDirect
     }
 }
@@ -316,7 +321,7 @@ function UnitRadioCommand(unitName)
             local unitpos = unit:getPoint()
             local destinationZone = trigger.misc.getZone(nearestObj.ZoneName)
             SpawnBlueInfantry(unitName, "heli")
-            
+            trigger.action.setUnitInternalCargo(unitName, 0)
             trigger.action.outText(playerName .. " (" .. groupName .. ") dropped " .. #UnitStateTable[unitName] .. " soldiers at " .. dropoffZone.Name, 10)
             
             UnitStateTable[unitName] = {}
@@ -333,6 +338,7 @@ function UnitRadioCommand(unitName)
         -- if we're in pickup zone, load troops
         if pickupZone ~= nil then
             UnitStateTable[unitName] = FillBlueUnitComposition("heli")
+            trigger.action.setUnitInternalCargo(unitName, 1360) -- assuming roughly 250 lbs per infantry unit
             trigger.action.outText(playerName .. " (" .. groupName .. ") loaded a squad at " .. pickupZone.Name .. ".", 10)
         else
             trigger.action.outText(playerName .. " (" .. groupName .. ") isn't in a pickup or dropoff zone. (" .. #UnitStateTable[unitName] .. " soldiers aboard)", 10)
@@ -424,9 +430,29 @@ function StatusUpdate(args, time)
         local blueUnits = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), {Objectives[i].ZoneName})
         local redUnits = mist.getUnitsInZones(mist.makeUnitTable({'[red][vehicle]'}), {Objectives[i].ZoneName})
         if (#blueUnits > 0 and #redUnits == 0) then
+            -- check if it just changed to trigger sound bit
+            if (Objectives[i].Owner ~= "Blue") then
+                local sound_bit = mist.random(2)
+                if (sound_bit == 1) then
+                    trigger.action.outSound("Sounds/cap_obj_1.wav")
+                else 
+                    trigger.action.outSound("Sounds/cap_obj_2.wav")
+                end
+                trigger.action.outText("We've captured the " .. Objectives[i].Name .. " objective!", 10)
+            end
             Objectives[i].Owner = "Blue"
             blue_objs = blue_objs + 1
         elseif (#blueUnits == 0 and #redUnits > 0) then 
+            -- check if it just changed to trigger sound bit
+            if (Objectives[i].Owner == "Blue") then
+                local sound_bit = mist.random(2)
+                if (sound_bit == 1) then
+                    trigger.action.outSound("Sounds/overrun1.wav")
+                else
+                    trigger.action.outSound("Sounds/overrun2.wav")
+                end
+                trigger.action.outText("The enemy has captured the " .. Objectives[i].Name .. " objective!", 10)
+            end
             Objectives[i].Owner = "Red"
         else 
             Objectives[i].Owner = "Uncontrolled"
@@ -510,9 +536,9 @@ function SpawnBlueInfantry(tUnit, transportType)
                 coalition.addGroup(country.id.USA, Group.Category.GROUND, newGroup)
                 --adjust resources table
                 if(transportType == "heli") then
-                    coalitionResources[1].supply = coalitionResources[1].supply - 8
-                else 
                     coalitionResources[1].supply = coalitionResources[1].supply - 15
+                else 
+                    coalitionResources[1].supply = coalitionResources[1].supply - 20
                 end
 
                 UnitStateTable[unit] = {}
@@ -621,9 +647,12 @@ function SpawnController(args, time)
             for i=1,#redSpawn1 do
                 local unit = redSpawn1[i]
                 local typename = unit:getTypeName()
+                local group = unit:getGroup()
                 if((typename == 'GAZ-3308') and (has_value(discharged_transport, unit:getName()) == false)) then
+                    trigger.action.groupStopMoving(group)
                     SpawnRedInfantry(unit:getName())
                     table.insert(discharged_transport, unit:getName())
+                    trigger.action.groupContinueMoving(group)
                 end
             end
         end
@@ -636,9 +665,12 @@ function SpawnController(args, time)
             for i=1,#redSpawn2 do
                 local unit = redSpawn2[i]
                 local typename = unit:getTypeName()
+                local group = unit:getGroup()
                 if((typename == 'speedboat') and (has_value(discharged_transport, unit:getName()) == false)) then
+                    trigger.action.groupStopMoving(group)
                     SpawnRedInfantry(unit:getName())
                     table.insert(discharged_transport, unit:getName())
+                    trigger.action.groupContinueMoving(group)
                 end
             end
         end
@@ -660,7 +692,7 @@ function SpawnNewTrucks(args, time)
         else
             blue_clone = mist.cloneGroup("Blue_Truck_2")
         end
-        coalitionResources[1].supply = coalitionResources[1].supply - 5
+        coalitionResources[1].supply = coalitionResources[1].supply - 50
 
         mist.scheduleFunction(mist.groupToRandomZone, {blue_clone["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 10)
     end
@@ -684,16 +716,16 @@ function SpawnNewTrucks(args, time)
                 red_clone = mist.cloneGroup("RedTransport_1-2")
                 LC_AA = mist.cloneGroup("LC_AA_2")
             elseif(rc_no == 3) then
-                rec_clone = mist.cloneGroup("RedTransport_1-3")
+                red_clone = mist.cloneGroup("RedTransport_1-3")
                 LC_AA = mist.cloneGroup("LC_AA_3")
             else
                 red_clone = mist.cloneGroup("RedTransport_1-4")
                 LC_AA = mist.cloneGroup("LC_AA_4")
             end
-            coalitionResources[2].supply = coalitionResources[2].supply - (10 * difficulty_modifier)    
+            coalitionResources[2].supply = coalitionResources[2].supply - 100    
             
-            mist.scheduleFunction(mist.groupToRandomZone, {red_clone["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 60)
-            mist.scheduleFunction(mist.groupToRandomZone, {LC_AA["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 60)
+            mist.scheduleFunction(mist.groupToRandomZone, {red_clone["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 10)
+            mist.scheduleFunction(mist.groupToRandomZone, {LC_AA["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 10)
         end
     end
 
@@ -731,13 +763,12 @@ end
 
 
 do
-    --timer.scheduleFunction(printUnitType, nil, timer.getTime() + 1)
     timer.scheduleFunction(MortarAttack, nil, timer.getTime() + 300)
     timer.scheduleFunction(SpawnController, nil, timer.getTime() + 1)
     timer.scheduleFunction(SpawnNewTrucks, nil, timer.getTime() + 600)
     timer.scheduleFunction(StatusUpdate, nil, timer.getTime() + 10)
     timer.scheduleFunction(SmokeTimer, nil, timer.getTime() + 120)
-    timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 5)
+    timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 1)
     timer.scheduleFunction(StatusReport, nil, timer.getTime() + 120)
 end
 
