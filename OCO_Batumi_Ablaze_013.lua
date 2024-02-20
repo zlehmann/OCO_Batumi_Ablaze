@@ -157,7 +157,7 @@ PickupZones = {
     [1] = {
         Name = "Batumi Ramp",
         ZoneName = "PickupZone_BatumiRamp"
-    },
+    }
 }
 
 DropoffZones = {
@@ -217,6 +217,10 @@ function FillBlueUnitComposition(unitType)
         end
         for i=3,12 do
             retval[i] = "Soldier M4"
+        end
+    elseif(unitType == "cargo") then
+        for i=1,5 do
+            retval[i] = "2B11 mortar"
         end
     end
     
@@ -512,8 +516,41 @@ function SmokeTimer(args, time)
     return time + 300
 end
 
-function SpawnBlueInfantry(tUnit, transportType)
+function SpawnBlueMortar(tUnit)
     if(coalitionResources[1].supply > 8) then
+        local unit = StaticObject.getByName(tUnit)
+
+        if unit == nil then
+            UnitStateTable[unit] = {}
+            return
+        else
+            UnitStateTable[unit] = FillBlueUnitComposition("cargo")
+        end
+
+        local dropoffZone = SOInAnyDropoffZone(unit)
+        local nearestObj = FindNearestObjective(unit, 10000, "Blue")
+
+        if #UnitStateTable[unit] > 0 then
+                
+            if dropoffZone ~= nil then
+                local unitpos = unit:getPoint()
+                local destinationZone = trigger.misc.getZone(nearestObj.ZoneName)
+                local newGroup = dropoffZone.DropFunction(UnitStateTable[unit], "dynBlueMortar", "Blue", 15, unitpos.x, unitpos.z, destinationZone.point.x, destinationZone.point.z)
+                coalition.addGroup(country.id.USA, Group.Category.GROUND, newGroup)
+                --adjust resources table
+                coalitionResources[1].supply = coalitionResources[1].supply - 20
+
+                UnitStateTable[unit] = {}
+            end
+        end
+    else 
+        trigger.setUserFlag('97', true)
+        trigger.action.outText("Blue forces are out of supply!!!", 30)
+    end
+end
+
+function SpawnBlueInfantry(tUnit, transportType)
+    if(coalitionResources[1].supply > 20) then
         local unit = Unit.getByName(tUnit)
         
         if unit == nil then
@@ -683,7 +720,7 @@ end
 function SpawnNewTrucks(args, time)
     -- control truck cloning
     destZones = {'DropoffZone_BD1', 'DropoffZone_BD2', 'DropoffZone_BD3', 'DropoffZone_BD4', 'DropoffZone_BPP1', 'DropoffZone_BPP2', 'DropoffZone_BPP3', 'DropoffZone_BPP4'}
-
+    navalZones = {'Naval_Landing1', 'Naval_Landing2', 'Naval_Landing3', 'Naval_Landing4'}
     if(trigger.misc.getUserFlag(97) ~= 1) then
         local bc_no = mist.random(2)
         local blue_clone = nil
@@ -722,10 +759,12 @@ function SpawnNewTrucks(args, time)
                 red_clone = mist.cloneGroup("RedTransport_1-4")
                 LC_AA = mist.cloneGroup("LC_AA_4")
             end
-            coalitionResources[2].supply = coalitionResources[2].supply - 100    
+            naval = mist.cloneGroup("Naval-1")
+            coalitionResources[2].supply = coalitionResources[2].supply - 120    
             
             mist.scheduleFunction(mist.groupToRandomZone, {red_clone["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 10)
             mist.scheduleFunction(mist.groupToRandomZone, {LC_AA["name"], destZones, 'cone', nil, 40, false}, timer.getTime() + 10)
+            mist.scheduleFunction(mist.groupToRandomZone, {naval["name"], navalZones, 'cone', nil, 40, false}, timer.getTime() + 10)
         end
     end
 
@@ -755,14 +794,14 @@ function MortarAttack(args, time)
     return time + (300 + mist.random(60))
 end
 
-function printUnitType(args, time)
-    local unit = Unit.getByName("Naval-1-1")
-    trigger.action.outText(unit:getTypeName(), 600)
+function log(args, time)
+    local cargo = StaticObject.getByName("Heavy Weapons-1-1")
+    trigger.action.outText("Cargo is in the air: " .. tostring(mist.vec.mag(cargo:getVelocity())) .. ".", 5)
     return time + 1
 end
 
-
 do
+    --timer.scheduleFunction(log, nil, timer.getTime() + 1)
     timer.scheduleFunction(MortarAttack, nil, timer.getTime() + 300)
     timer.scheduleFunction(SpawnController, nil, timer.getTime() + 1)
     timer.scheduleFunction(SpawnNewTrucks, nil, timer.getTime() + 600)
