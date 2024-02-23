@@ -662,6 +662,7 @@ trigger.action.setUserFlag('100', false)
 
 -- Checks if trucks are in drop zones to spawn infantry
 function SpawnController(args, time)
+    trigger.action.outText("Testing", 1)
     -- check blue truck spawns
     local blueSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), blue_truck_dropzones)
     if(#blueSpawn1 > 0) then
