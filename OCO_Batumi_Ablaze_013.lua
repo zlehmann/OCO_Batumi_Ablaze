@@ -357,7 +357,6 @@ end
 
 
 function AddRadioCommand(unitName)
-    trigger.action.outText("Inside AddradioCommand, unitName is: " .. unitName, 10)
     if RadioCommandTable[unitName] == nil then
         local unit = Unit.getByName(unitName)
         if unit == nil then
@@ -378,7 +377,6 @@ end
 
 
 function AddRadioCommands(arg, time)
-    trigger.action.outText("Inside AddRadioCommands", 5)
     AddRadioCommand("Slick1")
     AddRadioCommand("Slick2")
     AddRadioCommand("Slick3")
