@@ -4924,14 +4924,6 @@ function ctld.addF10MenuOptions()
             env.error(string.format("Error adding f10 to transport: %s", error), false)
         end
     end
-
-
-
-    if (not status) then
-        env.error(string.format("Error adding f10 to other players: %s", error), false)
-    end
-
-
 end
 
 --add to all players that arent transport

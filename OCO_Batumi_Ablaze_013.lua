@@ -357,6 +357,7 @@ end
 
 
 function AddRadioCommand(unitName)
+    trigger.action.outText("Inside AddradioCommand, unitName is: " .. unitName, 10)
     if RadioCommandTable[unitName] == nil then
         local unit = Unit.getByName(unitName)
         if unit == nil then
@@ -377,6 +378,7 @@ end
 
 
 function AddRadioCommands(arg, time)
+    trigger.action.outText("Inside AddRadioCommands", 5)
     AddRadioCommand("Slick1")
     AddRadioCommand("Slick2")
     AddRadioCommand("Slick3")
@@ -484,9 +486,6 @@ function StatusReport(args, time)
     for i=1,#Objectives do
         text = text .. Objectives[i].Name .. ": " .. tostring(Objectives[i].BlueUnits) .. " blue | red " .. tostring(Objectives[i].RedUnits) .."\n"
     end
-    -- add resource summary
-    text = text .. "Blue supply remaining: " .. tostring(coalitionResources[1].supply) .. "\n"
-    text = text .. "Red supply remaining: " .. tostring(coalitionResources[2].supply) .. "\n"
     
     trigger.action.outText(text, 10)
     return time + 120
@@ -714,7 +713,7 @@ end
 function SpawnNewTrucks(args, time)
     -- control truck cloning
     destZones = {'DropoffZone_BD1', 'DropoffZone_BD2', 'DropoffZone_BD3', 'DropoffZone_BD4', 'DropoffZone_BPP1', 'DropoffZone_BPP2', 'DropoffZone_BPP3', 'DropoffZone_BPP4'}
-    navalZones = {'Naval_Landing1', 'Naval_Landing2', 'Naval_Landing3', 'Naval_Landing4'}
+    navalZones = {'Naval_Landing1', 'Naval_Landing2'}
     if(trigger.misc.getUserFlag(97) ~= 1) then
         local bc_no = mist.random(2)
         local blue_clone = nil
@@ -831,13 +830,13 @@ end
 do
     --timer.scheduleFunction(log, nil, timer.getTime() + 1)
     timer.scheduleFunction(CheckBlueTruckHp, nil, timer.getTime() + 1)
+    timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 5)
     timer.schedulefunction(CheckRedTruckHp, nil, timer.getTime() + 1)
     timer.scheduleFunction(MortarAttack, nil, timer.getTime() + 300)
     timer.scheduleFunction(SpawnController, nil, timer.getTime() + 1)
     timer.scheduleFunction(SpawnNewTrucks, nil, timer.getTime() + 600)
     timer.scheduleFunction(StatusUpdate, nil, timer.getTime() + 10)
-    timer.scheduleFunction(SmokeTimer, nil, timer.getTime() + 120)
-    timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 1)
+    timer.scheduleFunction(SmokeTimer, nil, timer.getTime() + 120)    
     timer.scheduleFunction(StatusReport, nil, timer.getTime() + 120)
 end
 
