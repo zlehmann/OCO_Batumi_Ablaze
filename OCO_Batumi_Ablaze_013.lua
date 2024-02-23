@@ -662,7 +662,6 @@ trigger.action.setUserFlag('100', false)
 
 -- Checks if trucks are in drop zones to spawn infantry
 function SpawnController(args, time)
-    trigger.action.outText("Testing", 1)
     -- check blue truck spawns
     local blueSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), blue_truck_dropzones)
     if(#blueSpawn1 > 0) then
@@ -795,8 +794,44 @@ function log(args, time)
     return time + 1
 end
 
+function CheckBlueTruckHp(args, time)
+    -- check blue trucks
+    local blueTrucks = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), DropoffZones)
+    for i=1,#blueTrucks do
+        trigger.action.outText(tostring(unit), 1)
+        if(blueTrucks[i].getLive() < 100) then
+            local typename = unit:getTypeName()
+            if((typename == 'KAMAZ Truck') and (has_value(discharged_transport, unit:getName()) == false)) then
+                SpawnBlueInfantry(unit:getName(), "truck")
+                table.insert(discharged_transport, unit:getName())
+            end
+        end
+    end
+
+    return time + 1
+end
+
+function CheckRedTruckHp(args, time)
+    -- check red trucks
+    local redTrucks = mist.getUnitsInZones(mist.makeUnitTable({'[red][vehicle]'}), DropoffZones)
+    for i=1,#redTrucks do
+        trigger.action.outText(tostring(unit), 1)
+        if(redTrucks[i].getLive() < 100) then
+            local typename = unit:getTypeName()
+            if((typename == 'GAZ-3308') and (has_value(discharged_transport, unit:getName()) == false)) then
+                SpawnRedInfantry(unit:getName(), "truck")
+                table.insert(discharged_transport, unit:getName())
+            end
+        end
+    end
+
+    return time + 1
+end
+
 do
     --timer.scheduleFunction(log, nil, timer.getTime() + 1)
+    timer.scheduleFunction(CheckBlueTruckHp, nil, timer.getTime() + 1)
+    timer.schedulefunction(CheckRedTruckHp, nil, timer.getTime() + 1)
     timer.scheduleFunction(MortarAttack, nil, timer.getTime() + 300)
     timer.scheduleFunction(SpawnController, nil, timer.getTime() + 1)
     timer.scheduleFunction(SpawnNewTrucks, nil, timer.getTime() + 600)
@@ -805,6 +840,7 @@ do
     timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 1)
     timer.scheduleFunction(StatusReport, nil, timer.getTime() + 120)
 end
+
 
 
 function UnitInAnyPickupZone(unit)
