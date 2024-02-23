@@ -663,52 +663,46 @@ trigger.action.setUserFlag('100', false)
 -- Checks if trucks are in drop zones to spawn infantry
 function SpawnController(args, time)
     -- check blue truck spawns
-    if(trigger.misc.getUserFlag(1) == 1) then
-        local blueSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), blue_truck_dropzones)
-        if(#blueSpawn1 > 0) then
-            for i=1,#blueSpawn1 do
-                local unit = blueSpawn1[i]
-                local typename = unit:getTypeName()
-                if((typename == 'KAMAZ Truck') and (has_value(discharged_transport, unit:getName()) == false)) then
-                    SpawnBlueInfantry(unit:getName(), "truck")
-                    table.insert(discharged_transport, unit:getName())
-                end
+    local blueSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), blue_truck_dropzones)
+    if(#blueSpawn1 > 0) then
+        for i=1,#blueSpawn1 do
+            local unit = blueSpawn1[i]
+            local typename = unit:getTypeName()
+            if((typename == 'KAMAZ Truck') and (has_value(discharged_transport, unit:getName()) == false)) then
+                SpawnBlueInfantry(unit:getName(), "truck")
+                table.insert(discharged_transport, unit:getName())
             end
         end
     end
 
     -- check red truck spawns
-    if(trigger.misc.getUserFlag(2) == 1) then
-        local redSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[red][vehicle]'}), red_truck_dropzones)
-        if(#redSpawn1 > 0) then
-            for i=1,#redSpawn1 do
-                local unit = redSpawn1[i]
-                local typename = unit:getTypeName()
-                local group = unit:getGroup()
-                if((typename == 'GAZ-3308') and (has_value(discharged_transport, unit:getName()) == false)) then
-                    trigger.action.groupStopMoving(group)
-                    SpawnRedInfantry(unit:getName())
-                    table.insert(discharged_transport, unit:getName())
-                    trigger.action.groupContinueMoving(group)
-                end
+    local redSpawn1 = mist.getUnitsInZones(mist.makeUnitTable({'[red][vehicle]'}), red_truck_dropzones)
+    if(#redSpawn1 > 0) then
+        for i=1,#redSpawn1 do
+            local unit = redSpawn1[i]
+            local typename = unit:getTypeName()
+            local group = unit:getGroup()
+            if((typename == 'GAZ-3308') and (has_value(discharged_transport, unit:getName()) == false)) then
+                trigger.action.groupStopMoving(group)
+                SpawnRedInfantry(unit:getName())
+                table.insert(discharged_transport, unit:getName())
+                trigger.action.groupContinueMoving(group)
             end
         end
     end
 
     -- check red boats spawns
-    if(trigger.misc.getUserFlag(3) == 1) then
-        local redSpawn2 = mist.getUnitsInZones(mist.makeUnitTable({'[red][ship]'}), red_boat_dropzones)
-        if(#redSpawn2 > 0) then
-            for i=1,#redSpawn2 do
-                local unit = redSpawn2[i]
-                local typename = unit:getTypeName()
-                local group = unit:getGroup()
-                if((typename == 'speedboat') and (has_value(discharged_transport, unit:getName()) == false)) then
-                    trigger.action.groupStopMoving(group)
-                    SpawnRedInfantry(unit:getName())
-                    table.insert(discharged_transport, unit:getName())
-                    trigger.action.groupContinueMoving(group)
-                end
+    local redSpawn2 = mist.getUnitsInZones(mist.makeUnitTable({'[red][ship]'}), red_boat_dropzones)
+    if(#redSpawn2 > 0) then
+        for i=1,#redSpawn2 do
+            local unit = redSpawn2[i]
+            local typename = unit:getTypeName()
+            local group = unit:getGroup()
+            if((typename == 'speedboat') and (has_value(discharged_transport, unit:getName()) == false)) then
+                trigger.action.groupStopMoving(group)
+                SpawnRedInfantry(unit:getName())
+                table.insert(discharged_transport, unit:getName())
+                trigger.action.groupContinueMoving(group)
             end
         end
     end
