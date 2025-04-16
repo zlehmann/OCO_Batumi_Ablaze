@@ -2,6 +2,57 @@
 groupCounter = 100
 unitCounter = 100
 
+-- FIND TABLE LENGTH-----
+function FindTableLength(table)
+    size = 0
+    for _ in pairs(table) do size = size + 1 end
+    return size
+end
+
+function has_value (tab, val)
+    for index, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
+end
+
+function NewBlueSoldierUnit(x, y, heading, unitType)
+    local unit = {
+        ["y"] = y,
+        ["type"] = unitType,
+        ["name"] = "Unitname" .. unitCounter,
+        ["unitId"] = unitCounter,
+        ["heading"] = heading,
+        ["playerCanDrive"] = true,
+        ["skill"] = "Excellent",
+        ["x"] = x,
+    }
+    
+    unitCounter = unitCounter + 1
+    
+    return unit    
+end
+
+function NewRedSoldierUnit(x, y, heading, unitType)
+    local unit = {
+        ["y"] = y,
+        ["type"] = unitType,
+        ["name"] = "Unitname" .. unitCounter,
+        ["unitId"] = unitCounter,
+        ["heading"] = heading,
+        ["playerCanDrive"] = true,
+        ["skill"] = "Average",
+        ["x"] = x,
+    }
+    
+    unitCounter = unitCounter + 1
+    
+    return unit    
+end
+
 function DropoffGroupDirect(typeList, groupName, coalition, radius, xCenter, yCenter, xDest, yDest)
     local group = {
         ["visible"] = false,
@@ -86,39 +137,7 @@ function DropoffGroupDirect(typeList, groupName, coalition, radius, xCenter, yCe
     return group
 end
 
-function NewBlueSoldierUnit(x, y, heading, unitType)
-    local unit = {
-        ["y"] = y,
-        ["type"] = unitType,
-        ["name"] = "Unitname" .. unitCounter,
-        ["unitId"] = unitCounter,
-        ["heading"] = heading,
-        ["playerCanDrive"] = true,
-        ["skill"] = "Excellent",
-        ["x"] = x,
-    }
-    
-    unitCounter = unitCounter + 1
-    
-    return unit    
-end
 
-function NewRedSoldierUnit(x, y, heading, unitType)
-    local unit = {
-        ["y"] = y,
-        ["type"] = unitType,
-        ["name"] = "Unitname" .. unitCounter,
-        ["unitId"] = unitCounter,
-        ["heading"] = heading,
-        ["playerCanDrive"] = true,
-        ["skill"] = "Average",
-        ["x"] = x,
-    }
-    
-    unitCounter = unitCounter + 1
-    
-    return unit    
-end
 
 -- ZONE INITIALIZIATIONS ---------------------------------------------------------------------
 
@@ -241,6 +260,12 @@ function FillRedUnitComposition(unitType)
     return retval
 end
 
+function GetDistance(xUnit, yUnit, xZone, yZone)
+    local xDiff = xUnit - xZone
+    local yDiff = yUnit - yZone
+    return math.sqrt(xDiff * xDiff + yDiff * yDiff)    
+end
+
 function FindNearestPickupGroup(playerUnit, maxDistance)
     local retval = {
         Group = nil,
@@ -292,17 +317,86 @@ function FindNearestPickupGroup(playerUnit, maxDistance)
     return retval
 end
 
+function UnitInZone(unit, zone)
+    if unit:inAir() then
+        return false
+    end
+    
+    local triggerZone = trigger.misc.getZone(zone.ZoneName)
+    local group = unit:getGroup()
+    local groupid = group:getID()
+    local unitpos = unit:getPoint()
+    local xDiff = unitpos.x - triggerZone.point.x
+    local yDiff = unitpos.z - triggerZone.point.z
+    local dist = math.sqrt(xDiff * xDiff + yDiff * yDiff)
+    
+    if dist > triggerZone.radius then
+        return false
+    end
+    
+    return true
+end
 
+function UnitInAnyPickupZone(unit)
+    for i=1,#PickupZones do
+        if UnitInZone(unit, PickupZones[i]) then
+            return PickupZones[i]
+        end
+    end
+    
+    return nil
+end
 
+function UnitInAnyDropoffZone(unit)
+    for i=1,#DropoffZones do
+        if UnitInZone(unit, DropoffZones[i]) then
+            return DropoffZones[i]
+        end
+    end
+    
+    return nil
+end
+
+-- finds the nearest neutral or enemy objective to set spawn destinations to
+function FindNearestObjective(unit, maxDistance, team)
+    local minDist = maxDistance
+    local minZone = nil
+    local unitpos = unit:getPoint()
+     -- only look for neutral or enemy objectives
+    if team == "Blue" then
+        for i=1,#Objectives do
+            if Objectives[i].Owner ~= "Blue" then
+                local zone = trigger.misc.getZone(Objectives[i].ZoneName)
+                local dist = GetDistance(unitpos.x, unitpos.z, zone.point.x, zone.point.z)
+                if dist < minDist then
+                    minDist = dist
+                    minZone = Objectives[i]
+                end
+            end
+        end
+    else 
+        for i=1,#Objectives do
+            if Objectives[i].Owner ~= "Red" then
+                local zone = trigger.misc.getZone(Objectives[i].ZoneName)
+                local dist = GetDistance(unitpos.x, unitpos.z, zone.point.x, zone.point.z)
+                if dist < minDist then
+                    minDist = dist
+                    minZone = Objectives[i]
+                end
+            end
+        end
+    end
+    
+    return minZone    
+end
 
 function UnitRadioCommand(unitName)
     local unit = Unit.getByName(unitName)
-    
+        
     if unit == nil then
         UnitStateTable[unitName] = {}
         return
     end
-    
     local unitId = unit:getID()
     local group = unit:getGroup()
     local groupName = group:getName()
@@ -311,11 +405,10 @@ function UnitRadioCommand(unitName)
     if UnitStateTable[unitName] == nil then
         UnitStateTable[unitName] = {}
     end
-    
     local pickupZone = UnitInAnyPickupZone(unit)
     local dropoffZone = UnitInAnyDropoffZone(unit)
     local nearestObj = FindNearestObjective(unit, 10000, "Blue")
-    
+
     if #UnitStateTable[unitName] > 0 then
         -- if in pickupZone (fob) then drop troops and credit score
         -- if in dropoff zone, then drop the troops in place
@@ -383,48 +476,6 @@ function AddRadioCommands(arg, time)
     AddRadioCommand("Slick4")
     return time + 5
 end
-
-function GetDistance(xUnit, yUnit, xZone, yZone)
-    local xDiff = xUnit - xZone
-    local yDiff = yUnit - yZone
-    return math.sqrt(xDiff * xDiff + yDiff * yDiff)    
-end
-
-
--- finds the nearest neutral or enemy objective to set spawn destinations to
-function FindNearestObjective(unit, maxDistance, team)
-    local minDist = maxDistance
-    local minZone = nil
-    local unitpos = unit:getPoint()
-     -- only look for neutral or enemy objectives
-    if team == "Blue" then
-        for i=1,#Objectives do
-            if Objectives[i].Owner ~= "Blue" then
-                local zone = trigger.misc.getZone(Objectives[i].ZoneName)
-                local dist = GetDistance(unitpos.x, unitpos.z, zone.point.x, zone.point.z)
-                if dist < minDist then
-                    minDist = dist
-                    minZone = Objectives[i]
-                end
-            end
-        end
-    else 
-        for i=1,#Objectives do
-            if Objectives[i].Owner ~= "Red" then
-                local zone = trigger.misc.getZone(Objectives[i].ZoneName)
-                local dist = GetDistance(unitpos.x, unitpos.z, zone.point.x, zone.point.z)
-                if dist < minDist then
-                    minDist = dist
-                    minZone = Objectives[i]
-                end
-            end
-        end
-    end
-    
-    return minZone    
-end
-
-
 
 function StatusUpdate(args, time)
     -- track blue conquest
@@ -765,6 +816,7 @@ function SpawnNewTrucks(args, time)
 end
 
 function MortarAttack(args, time)
+    trigger.action.outText("mortars", 10)
     local no_mortars = mist.random(8)
     local attack_zone = nil
     if(Objectives[3].Owner == "Blue" or Objectives[3].Owner == "Uncontrolled") then
@@ -794,6 +846,7 @@ end
 function CheckBlueTruckHp(args, time)
     -- check blue trucks
     local blueTrucks = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), DropoffZones)
+    trigger.action.outText("check blue trucks hp", 10)
     for i=1,#blueTrucks do
         trigger.action.outText(tostring(unit), 1)
         if(blueTrucks[i].getLive() < 100) then
@@ -840,61 +893,11 @@ end
 
 
 
-function UnitInAnyPickupZone(unit)
-    for i=1,#PickupZones do
-        if UnitInZone(unit, PickupZones[i]) then
-            return PickupZones[i]
-        end
-    end
-    
-    return nil
-end
-
-function UnitInAnyDropoffZone(unit)
-    for i=1,#DropoffZones do
-        if UnitInZone(unit, DropoffZones[i]) then
-            return DropoffZones[i]
-        end
-    end
-    
-    return nil
-end
 
 
-function UnitInZone(unit, zone)
-    if unit:inAir() then
-        return false
-    end
-    
-    local triggerZone = trigger.misc.getZone(zone.ZoneName)
-    local group = unit:getGroup()
-    local groupid = group:getID()
-    local unitpos = unit:getPoint()
-    local xDiff = unitpos.x - triggerZone.point.x
-    local yDiff = unitpos.z - triggerZone.point.z
-    local dist = math.sqrt(xDiff * xDiff + yDiff * yDiff)
-    
-    if dist > triggerZone.radius then
-        return false
-    end
-    
-    return true
-end
 
 
--- FIND TABLE LENGTH-----
-function FindTableLength(table)
-    size = 0
-    for _ in pairs(table) do size = size + 1 end
-    return size
-end
 
-function has_value (tab, val)
-    for index, value in ipairs(tab) do
-        if value == val then
-            return true
-        end
-    end
 
-    return false
-end
+
+
