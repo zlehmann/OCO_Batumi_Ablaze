@@ -816,7 +816,7 @@ function SpawnNewTrucks(args, time)
 end
 
 function MortarAttack(args, time)
-    trigger.action.outText("mortars", 10)
+    trigger.action.outText("We're under mortar attack!!", 10)
     local no_mortars = mist.random(8)
     local attack_zone = nil
     if(Objectives[3].Owner == "Blue" or Objectives[3].Owner == "Uncontrolled") then
@@ -846,9 +846,7 @@ end
 function CheckBlueTruckHp(args, time)
     -- check blue trucks
     local blueTrucks = mist.getUnitsInZones(mist.makeUnitTable({'[blue][vehicle]'}), DropoffZones)
-    trigger.action.outText("check blue trucks hp", 10)
     for i=1,#blueTrucks do
-        trigger.action.outText(tostring(unit), 1)
         if(blueTrucks[i].getLive() < 100) then
             local typename = unit:getTypeName()
             if((typename == 'KAMAZ Truck') and (has_value(discharged_transport, unit:getName()) == false)) then
@@ -865,7 +863,6 @@ function CheckRedTruckHp(args, time)
     -- check red trucks
     local redTrucks = mist.getUnitsInZones(mist.makeUnitTable({'[red][vehicle]'}), DropoffZones)
     for i=1,#redTrucks do
-        trigger.action.outText(tostring(unit), 1)
         if(redTrucks[i].getLive() < 100) then
             local typename = unit:getTypeName()
             if((typename == 'GAZ-3308') and (has_value(discharged_transport, unit:getName()) == false)) then
@@ -882,13 +879,13 @@ do
     --timer.scheduleFunction(log, nil, timer.getTime() + 1)
     timer.scheduleFunction(CheckBlueTruckHp, nil, timer.getTime() + 1)
     timer.scheduleFunction(AddRadioCommands, nil, timer.getTime() + 5)
-    timer.schedulefunction(CheckRedTruckHp, nil, timer.getTime() + 1)
+    timer.scheduleFunction(CheckRedTruckHp, nil, timer.getTime() + 1)
     timer.scheduleFunction(MortarAttack, nil, timer.getTime() + 300)
     timer.scheduleFunction(SpawnController, nil, timer.getTime() + 1)
     timer.scheduleFunction(SpawnNewTrucks, nil, timer.getTime() + 600)
     timer.scheduleFunction(StatusUpdate, nil, timer.getTime() + 10)
-    timer.scheduleFunction(SmokeTimer, nil, timer.getTime() + 120)    
-    timer.scheduleFunction(StatusReport, nil, timer.getTime() + 120)
+    timer.scheduleFunction(SmokeTimer, nil, timer.getTime() + 1)    
+    timer.scheduleFunction(StatusReport, nil, timer.getTime() + 12)
 end
 
 
